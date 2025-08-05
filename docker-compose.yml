@@ -1,0 +1,50 @@
+# docker-compose.yml
+# Lokalna baza PostgreSQL + psql client
+
+version: '3.8'
+services:
+  # Lokalna baza PostgreSQL dla developmentu
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: trialwatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles:
+      - local
+
+  # psql client dla Railway
+  postgres-client-railway:
+    image: postgres:17-alpine
+    environment:
+      - PGPASSWORD=s3cr3t
+    command: psql -h containers-us-west-201.railway.app -p 7000 -U postgres -d railway
+    profiles:
+      - railway
+    networks:
+      - default
+
+  # psql client dla lokalnej bazy
+  postgres-client-local:
+    image: postgres:17-alpine
+    environment:
+      - PGPASSWORD=localpassword
+    command: psql -h postgres -U postgres -d trialwatch
+    depends_on:
+      - postgres
+    profiles:
+      - local
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+# Użycie:
+# docker-compose --profile local up -d              # Uruchom lokalną bazę
+# docker-compose --profile local run postgres-client-local  # Połącz z lokalną bazą
+# docker-compose --profile railway run postgres-client-railway  # Połącz z Railway

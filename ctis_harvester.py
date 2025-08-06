@@ -18,6 +18,7 @@ SEARCH_URL = (
 
 def today_path() -> Path:
     ts = pendulum.yesterday().format("YYYY-MM-DD")
+    # Lambda ma dostęp do /tmp
     tmp = Path("/tmp") / f"ctis_{ts}.csv"
     tmp.parent.mkdir(exist_ok=True, parents=True)
     return tmp
